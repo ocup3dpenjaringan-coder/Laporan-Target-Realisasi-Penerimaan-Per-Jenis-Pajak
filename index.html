@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analisis Penerimaan Pajak - UP3D Kecamatan Penjaringan (23 Nov 2026)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1e3a8a',
+                            900: '#0f172a',
+                            950: '#090d16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .tab-active {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.25);
+        }
+        .tab-inactive {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .tab-inactive:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        .card-elevated {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .card-elevated:hover {
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-block { display: block !important; }
+            body { background: #fff; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-900 selection:text-white">
+
+    <!-- Top Header Banner -->
+    <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-3.5">
+                    <div class="p-2.5 bg-blue-600/20 border border-blue-400/30 rounded-xl shrink-0">
+                        <i data-lucide="landmark" class="w-7 h-7 text-amber-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/30 rounded-full">
+                                Bapenda Provinsi DKI Jakarta
+                            </span>
+                            <span class="text-xs text-slate-300 flex items-center gap-1">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i> Posisi Data: Senin, 23 November 2026
+                            </span>
+                        </div>
+                        <h1 class="font-display text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white mt-1">
+                            Analisis Struktur Penerimaan, Kendala & Rencana Tindak Lanjut
+                        </h1>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Unit Pelayanan Pemungutan Pajak Daerah (UP3D) Kecamatan Penjaringan — Jakarta Utara
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center gap-2.5 no-print self-start md:self-center">
+                    <button onclick="copyExecutiveSummary()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 transition cursor-pointer">
+                        <i data-lucide="clipboard-copy" class="w-4 h-4 text-amber-400"></i>
+                        <span>Salin Ringkasan</span>
+                    </button>
+                    <button onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition cursor-pointer">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>Cetak Laporan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast (No alert() used) -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300 translate-y-4 opacity-0">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-3 text-sm">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+            <span id="toast-message">Ringkasan berhasil disalin ke clipboard!</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- SECTION 1: KPI UTAMA (INFOGRAFIS ATAS) -->
+        <section aria-label="Indikator Kinerja Utama">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1: Target APBD-P 2026 -->
+                <div class="card-elevated rounded-2xl p-5 border-l-4 border-l-blue-800 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Target APBD-P 2026</p>
+                            <h2 class="font-display text-2xl font-extrabold text-slate-900 mt-1.5">Rp 2,21 Triliun</h2>
+                            <p class="text-xs font-mono text-slate-500 mt-0.5">Rp 2.210.124.246.406</p>
+                        </div>
+                        <div class="p-2.5 bg-blue-50 text-blue-800 rounded-xl">
+                            <i data-lucide="target" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-600 font-medium">9 Jenis Pajak Daerah</span>
+                        <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 font-semibold">100% Baseline</span>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Realisasi s.d 23 Nov 2026 -->
+                <div class="card-elevated rounded-2xl p-5 border-l-4 border-l-emerald-600 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Realisasi s.d. 23 Nov 2026</p>
+                            <h2 class="font-display text-2xl font-extrabold text-emerald-700 mt-1.5">Rp 1,74 Triliun</h2>
+                            <p class="text-xs font-mono text-slate-500 mt-0.5">Rp 1.737.567.535.888</p>
+                        </div>
+                        <div class="p-2.5 bg-emerald-50 text-emerald-700 rounded-xl">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-emerald-700">Capaian: 78,62%</span>
+                            <span class="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">+0,49% YoY</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-emerald-600 h-2 rounded-full" style="width: 78.62%"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1.5">23 Nov 2025: Rp 1.729.175.013.607</p>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Kekurangan Target (Shortfall) -->
+                <div class="card-elevated rounded-2xl p-5 border-l-4 border-l-rose-600 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kekurangan Target (Shortfall)</p>
+                            <h2 class="font-display text-2xl font-extrabold text-rose-700 mt-1.5">Rp 472,56 Miliar</h2>
+                            <p class="text-xs font-mono text-slate-500 mt-0.5">Rp 472.556.710.518</p>
+                        </div>
+                        <div class="p-2.5 bg-rose-50 text-rose-700 rounded-xl">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex items-center gap-1.5 text-rose-700 font-semibold">
+                            <span>91,02% Shortfall dari BPHTB</span>
+                        </div>
+                        <p class="text-slate-500 mt-0.5">Kurang BPHTB: Rp 430,11 Miliar (38 hari tersisa)</p>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Sisa Piutang Pokok PBB-P2 -->
+                <div class="card-elevated rounded-2xl p-5 border-l-4 border-l-amber-500 relative overflow-hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Piutang Pokok PBB-P2 (93-25)</p>
+                            <h2 class="font-display text-2xl font-extrabold text-amber-700 mt-1.5">Rp 538,25 Miliar</h2>
+                            <p class="text-xs font-mono text-slate-500 mt-0.5">Rp 538.252.650.937</p>
+                        </div>
+                        <div class="p-2.5 bg-amber-50 text-amber-700 rounded-xl">
+                            <i data-lucide="layers" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs space-y-0.5">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600 font-medium">Objek Menunggak:</span>
+                            <span class="font-bold text-slate-900">173.889 SPPT</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Awal Rp 567,02 M | Terbayar 2026: Rp 116,24 M</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE NAVIGATION TABS -->
+        <nav class="no-print flex flex-wrap gap-2 bg-slate-200/70 p-1.5 rounded-2xl border border-slate-200" aria-label="Navigasi Halaman Dashboard">
+            <button onclick="switchTab('ringkasan')" id="btn-ringkasan" class="tab-active flex-1 min-w-[180px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                <span>Ringkasan & Grafik</span>
+            </button>
+            <button onclick="switchTab('tabel')" id="btn-tabel" class="tab-inactive flex-1 min-w-[180px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                <i data-lucide="table-2" class="w-4 h-4"></i>
+                <span>Tabel Struktur & Wilayah</span>
+            </button>
+            <button onclick="switchTab('kendala')" id="btn-kendala" class="tab-inactive flex-1 min-w-[180px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                <span>Infografis Kendala & RTL</span>
+            </button>
+            <button onclick="switchTab('simulasi')" id="btn-simulasi" class="tab-inactive flex-1 min-w-[180px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+                <span>Simulasi Kejar Target</span>
+            </button>
+        </nav>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 1: RINGKASAN & GRAFIK -->
+        <!-- ===================================================================== -->
+        <div id="tab-ringkasan" class="space-y-6">
+            <!-- Executive Insight Callout -->
+            <div class="bg-blue-950 text-white rounded-2xl p-5 shadow-sm border border-blue-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="p-2.5 bg-amber-400/20 rounded-xl shrink-0 mt-0.5">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-base text-amber-300">Sorotan Eksekutif Struktur Penerimaan (Hasil Pengolahan Python)</h3>
+                        <p class="text-xs sm:text-sm text-slate-200 mt-1 leading-relaxed">
+                            Tiga pilar utama menyumbang <strong>90,25%</strong> dari total realisasi pajak UP3D Penjaringan: <strong>PBB-P2 (53,78%)</strong>, <strong>BPHTB (20,22%)</strong>, dan <strong>PBJT Makanan & Minuman (16,25%)</strong>. Sebanyak 3 jenis pajak telah melampaui 100% target (PBJT Hiburan 101,79%, PBJT Mamin 101,05%, dan PAT 100,33%), namun <strong>BPHTB baru mencapai 44,96%</strong> sehingga menyumbang 91,02% dari total selisih target.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Chart 1: Struktur Kontribusi Penerimaan (Doughnut) -->
+                <div class="lg:col-span-5 card-elevated rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="font-display font-bold text-slate-900 text-base">Struktur Kontribusi Penerimaan</h3>
+                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Total Rp 1,74 T</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Proporsi realisasi masing-masing jenis pajak terhadap total penerimaan</p>
+                    </div>
+                    <div class="relative h-72 w-full flex items-center justify-center">
+                        <canvas id="chartKontribusi"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="bg-blue-50/70 p-2 rounded-lg">
+                            <span class="block text-slate-500">PBB-P2</span>
+                            <span class="font-bold text-blue-900 text-sm">53,78%</span>
+                        </div>
+                        <div class="bg-amber-50/70 p-2 rounded-lg">
+                            <span class="block text-slate-500">BPHTB</span>
+                            <span class="font-bold text-amber-800 text-sm">20,22%</span>
+                        </div>
+                        <div class="bg-emerald-50/70 p-2 rounded-lg">
+                            <span class="block text-slate-500">PBJT Mamin</span>
+                            <span class="font-bold text-emerald-800 text-sm">16,25%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Target vs Realisasi per Jenis Pajak (Grouped Bar) -->
+                <div class="lg:col-span-7 card-elevated rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="font-display font-bold text-slate-900 text-base">Perbandingan Target vs Realisasi (Miliar Rp)</h3>
+                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800">9 Jenis Pajak</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Kesenjangan (gap) terbesar terlihat pada sektor BPHTB sebesar Rp 430,11 Miliar</p>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="chartTargetRealisasi"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Chart 3: Persentase Capaian & Pertumbuhan YoY -->
+                <div class="lg:col-span-6 card-elevated rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-display font-bold text-slate-900 text-base">Capaian Target (%) per Jenis Pajak</h3>
+                        <span class="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Garis Batas: 100%</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Hijau: Melampaui target (&ge;100%) | Biru: Mendekati (&ge;80%) | Merah: Perlu atensi (&lt;80%)</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartCapaianPersen"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: PBB-P2 & Sisa Piutang per Kelurahan -->
+                <div class="lg:col-span-6 card-elevated rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-display font-bold text-slate-900 text-base">Peta PBB-P2 & Piutang Pokok per Kelurahan</h3>
+                        <span class="text-xs font-medium text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">5 Kelurahan</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Kamal Muara melampaui target (105,55%), namun memiliki sisa piutang Rp 297,14 Miliar</p>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartKelurahan"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 2: TABEL STRUKTUR & WILAYAH -->
+        <!-- ===================================================================== -->
+        <div id="tab-tabel" class="hidden space-y-6">
+            <!-- Table 1: Struktur Penerimaan 9 Jenis Pajak -->
+            <div class="card-elevated rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+                    <div>
+                        <h3 class="font-display font-bold text-slate-900 text-lg">1. Struktur Penerimaan, Kontribusi & Capaian per Jenis Pajak</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Posisi s.d. Senin, 23 November 2026 (Angka eksak dalam Rupiah penuh)</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="filterStatusPajak" onchange="renderTablePajak()" class="text-xs font-medium bg-slate-50 border border-slate-300 text-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800">
+                            <option value="all">Semua Status (9 Pajak)</option>
+                            <option value="surplus">Surplus / Tercapai (&ge;100%)</option>
+                            <option value="kurang">Belum Tercapai (&lt;100%)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white text-xs uppercase tracking-wider">
+                                <th class="py-3.5 px-4 font-semibold">No</th>
+                                <th class="py-3.5 px-4 font-semibold">Jenis Pajak Daerah</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Target APBD-P 2026 (Rp)</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Realisasi 23 Nov 2026 (Rp)</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Capaian</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Kontribusi</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Selisih / Kurang (Rp)</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">YoY (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-pajak" class="divide-y divide-slate-200 text-xs sm:text-sm">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot class="bg-slate-100 font-bold text-slate-900 text-xs sm:text-sm border-t-2 border-slate-300">
+                            <tr>
+                                <td class="py-3.5 px-4" colspan="2">TOTAL KESELURUHAN (9 JENIS PAJAK)</td>
+                                <td class="py-3.5 px-4 text-right font-mono">2.210.124.246.406</td>
+                                <td class="py-3.5 px-4 text-right font-mono text-blue-900">1.737.567.535.888</td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-900">78,62%</span>
+                                </td>
+                                <td class="py-3.5 px-4 text-center">100,00%</td>
+                                <td class="py-3.5 px-4 text-right font-mono text-rose-700">-472.556.710.518</td>
+                                <td class="py-3.5 px-4 text-center text-emerald-700">+0,49%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table 2: PBB-P2 dan Piutang per Kelurahan -->
+            <div class="card-elevated rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-slate-200 bg-white">
+                    <h3 class="font-display font-bold text-slate-900 text-lg">2. Rincian Realisasi PBB-P2, Tunggakan Tahun Berjalan & Piutang Pokok per Kelurahan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Sebaran beban target, ketetapan belum terbayar 2026, serta akumulasi piutang pokok (1993–2025) di 5 Kelurahan</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-blue-950 text-white text-xs uppercase tracking-wider">
+                                <th class="py-3.5 px-4 font-semibold">Kode & Nama Kelurahan</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Target APBD-P (Miliar)</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Realisasi Total (Miliar)</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Capaian (%)</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Belum Bayar Th Berjalan</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Sisa Piutang Pokok (93-25)</th>
+                                <th class="py-3.5 px-4 font-semibold text-right">Jumlah SPPT Piutang</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Kepatuhan SPPT 2026</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-kelurahan" class="divide-y divide-slate-200 text-xs sm:text-sm">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot class="bg-slate-100 font-bold text-slate-900 text-xs sm:text-sm border-t-2 border-slate-300">
+                            <tr>
+                                <td class="py-3.5 px-4">TOTAL KECAMATAN PENJARINGAN</td>
+                                <td class="py-3.5 px-4 text-right font-mono">Rp 965,06 M</td>
+                                <td class="py-3.5 px-4 text-right font-mono text-emerald-700">Rp 934,61 M*</td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">96,83%</span>
+                                </td>
+                                <td class="py-3.5 px-4 text-right font-mono text-amber-800">Rp 212,61 M</td>
+                                <td class="py-3.5 px-4 text-right font-mono text-rose-700">Rp 538,25 M</td>
+                                <td class="py-3.5 px-4 text-right font-mono">173.889 SPPT</td>
+                                <td class="py-3.5 px-4 text-center text-slate-700">Audit Lapangan</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="px-5 py-3 bg-slate-50 text-[11px] text-slate-500 border-t border-slate-200">
+                    *Catatan: Total realisasi pembulatan per kelurahan Rp 934,61 Miliar (angka akuntansi terpusat Rp 934.464.247.919). Fokus penagihan utama berada pada Kelurahan Kamal Muara (55,20% dari total piutang pokok kecamatan) dan Penjaringan (57.918 SPPT).
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 3: INFOGRAFIS KENDALA & RENCANA TINDAK LANJUT (RTL) -->
+        <!-- ===================================================================== -->
+        <div id="tab-kendala" class="hidden space-y-6">
+            <!-- Header Infografis -->
+            <div class="bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Diagnostik Lapangan & Peta Jalan Kebijakan</span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold mt-1">Identifikasi Kendala Pemungutan & Strategi Optimalisasi</h2>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">Pendekatan terpadu Intensifikasi dan Ekstensifikasi untuk mengamankan penerimaan akhir tahun 2026</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-xl border border-white/15 shrink-0">
+                        <i data-lucide="clock" class="w-6 h-6 text-amber-400"></i>
+                        <div>
+                            <div class="text-xs text-slate-300">Sisa Hari Kerja Efektif 2026</div>
+                            <div class="font-display font-bold text-lg text-white">38 Hari Kalender</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BAGIAN A: INFOGRAFIS KENDALA DI LAPANGAN -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold">1</div>
+                    <h3 class="font-display text-lg font-bold text-slate-900">Analisis Kendala Pemungutan di Lapangan</h3>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Kendala 1: Tunggakan Piutang Pajak Sektoral -->
+                    <div class="card-elevated rounded-2xl p-6 border-t-4 border-t-rose-600 space-y-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-rose-50 text-rose-700 rounded-xl">
+                                    <i data-lucide="building-2" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Kendala Utama #1</span>
+                                    <h4 class="font-display font-bold text-base text-slate-900">Tunggakan Piutang Pajak pada Sektor Strategis</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Masih tingginya akumulasi tunggakan piutang lama maupun ketetapan tahun berjalan yang belum dilunasi pada sektor-sektor bernilai besar di wilayah pesisir, pergudangan, dan komersial Penjaringan:
+                        </p>
+
+                        <div class="space-y-2.5">
+                            <!-- Sektor Properti & Kawasan Komersial (PBB-P2) -->
+                            <div class="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200/80">
+                                <div class="flex justify-between items-center font-bold text-xs sm:text-sm text-rose-950">
+                                    <span>1. Sektor Properti, Kawasan Industri & Pergudangan (PBB-P2)</span>
+                                    <span class="text-rose-700">Rp 538,25 M</span>
+                                </div>
+                                <p class="text-xs text-slate-700 mt-1">
+                                    Sisa piutang pokok (1993–2025) mencapai <strong>Rp 538,25 Miliar (173.889 SPPT)</strong>, terkonsentrasi di <strong>Kel. Kamal Muara (Rp 297,14 M)</strong> dan <strong>Kel. Penjaringan (Rp 69,59 M)</strong>, ditambah ketetapan tahun berjalan 2026 belum bayar sebesar <strong>Rp 212,61 Miliar</strong>.
+                                </p>
+                            </div>
+
+                            <!-- Sektor Transaksi Properti (BPHTB) -->
+                            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                                <div class="flex justify-between items-center font-bold text-xs sm:text-sm text-amber-950">
+                                    <span>2. Sektor Transaksi Peralihan Hak Properti (BPHTB)</span>
+                                    <span class="text-amber-800">Kurang Rp 430,11 M</span>
+                                </div>
+                                <p class="text-xs text-slate-700 mt-1">
+                                    Realisasi baru mencapai <strong>44,96%</strong> (terkontraksi <strong>-24,03% YoY</strong>) akibat perlambatan transaksi properti komersial/reklamasi dan penundaan validasi akta PPAT.
+                                </p>
+                            </div>
+
+                            <!-- Sektor Reklame, Jasa Parkir & PBBKB -->
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <div class="flex justify-between items-center font-bold text-xs sm:text-sm text-slate-900">
+                                    <span>3. Sektor Reklame, Jasa Parkir & Bahan Bakar (PBBKB)</span>
+                                    <span class="text-slate-700">Kurang Rp 13,04 M</span>
+                                </div>
+                                <p class="text-xs text-slate-600 mt-1">
+                                    <strong>Pajak Reklame</strong> kurang Rp 9,67 M (izin kedaluwarsa/penertiban), <strong>PBJT Jasa Parkir</strong> turun drastis <strong>-55,68% YoY</strong> (kurang Rp 2,78 M), dan <strong>PBBKB</strong> baru terealisasi <strong>38,14%</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kendala 2: Rendahnya Kepatuhan Pelaporan Omzet (Self-Assessment) -->
+                    <div class="card-elevated rounded-2xl p-6 border-t-4 border-t-amber-500 space-y-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-amber-50 text-amber-700 rounded-xl">
+                                    <i data-lucide="file-warning" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600">Kendala Utama #2</span>
+                                    <h4 class="font-display font-bold text-base text-slate-900">Rendahnya Kepatuhan Pelaporan Omzet (Self-Assessment)</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Sistem pemungutan <em>self-assessment</em> pada jenis pajak berbasis konsumsi (PBJT) masih menghadapi tantangan akurasi pelaporan serta ketepatan waktu penyampaian SPTPD oleh Wajib Pajak:
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center gap-2 text-amber-700 font-bold text-xs mb-1">
+                                    <i data-lucide="car" class="w-4 h-4"></i>
+                                    <span>PBJT Jasa Parkir & Perhotelan</span>
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Indikasi <em>under-reporting</em> omzet parkir non-tapping box (kurang Rp 2,78 M) dan pelaporan okupansi hotel (kurang Rp 2,33 M) yang belum sinkron dengan transaksi riil.
+                                </p>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center gap-2 text-amber-700 font-bold text-xs mb-1">
+                                    <i data-lucide="utensils" class="w-4 h-4"></i>
+                                    <span>PBJT Mamin & Hiburan (PIK/Pluit)</span>
+                                </div>
+                                <p class="text-xs text-slate-600">
+                                    Meski melampaui target (&gt;101%), tingkat perputaran (turnover) tenant kuliner & hiburan baru di kawasan PIK/Pluit sangat cepat sehingga banyak gerai belum melaporkan omzet secara rutin.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Bar Visual Kepatuhan Lembar SPPT -->
+                        <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200 space-y-2.5">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+                                <span>Disparitas Kepatuhan Lembar SPPT PBB-P2 (2026)</span>
+                                <span class="text-amber-800">Fokus Edukasi & Penagihan</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-700">Kel. Penjaringan (32.729 SPPT belum lunas)</span>
+                                    <span class="font-bold text-rose-700">43,56% Lunas</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-rose-600 h-2 rounded-full" style="width: 43.56%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-700">Kel. Pejagalan (18.234 SPPT belum lunas)</span>
+                                    <span class="font-bold text-amber-700">57,35% Lunas</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-amber-500 h-2 rounded-full" style="width: 57.35%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BAGIAN B: INFOGRAFIS STRATEGI OPTIMALISASI (INTENSIFIKASI & EKSTENSIFIKASI) -->
+            <div class="space-y-4 pt-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-900 text-white flex items-center justify-center font-bold">2</div>
+                    <h3 class="font-display text-lg font-bold text-slate-900">Rencana Tindak Lanjut: Strategi Optimalisasi Penerimaan</h3>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- PILAR 1: INTENSIFIKASI PAJAK -->
+                    <div class="card-elevated rounded-2xl overflow-hidden border border-blue-200">
+                        <div class="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-white/15 rounded-lg">
+                                    <i data-lucide="gavel" class="w-5 h-5 text-amber-300"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-display font-bold text-base">STRATEGI INTENSIFIKASI</h4>
+                                    <p class="text-xs text-blue-200">Optimalisasi pemungutan & penegakan kepatuhan Wajib Pajak terdaftar</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 bg-amber-400 text-slate-950 font-bold text-[11px] rounded-lg">Prioritas Tinggi</span>
+                        </div>
+
+                        <div class="p-6 space-y-4">
+                            <!-- Action 1.1 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center shrink-0 font-bold text-sm">A1</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-slate-900">Penagihan Aktif & Penerbitan Surat Paksa</h5>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                        Melakukan penagihan persuasif (<em>door-to-door</em> & pemanggilan) terhadap 100 penunggak PBB-P2 terbesar di <strong>Kel. Kamal Muara (Rp 297,14 M)</strong> dan <strong>Pluit (Rp 63,00 M)</strong>, dilanjutkan penerbitan Surat Teguran hingga Surat Paksa sebelum tutup buku 2026.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action 1.2 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center shrink-0 font-bold text-sm">A2</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-slate-900">Pemeriksaan Pajak & Uji Petik Omzet (e-TRMS / Tapping Box)</h5>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                        Melaksanakan pemeriksaan kepatuhan formal & material serta pengawasan <em>online</em> (<em>tapping box</em>) pada sektor <strong>PBJT Jasa Parkir, Perhotelan, Mamin, dan Hiburan</strong> untuk menguji kewajaran pelaporan omzet <em>self-assessment</em>.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action 1.3 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-rose-50/60 border border-rose-200">
+                                <div class="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 font-bold text-sm">A3</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-rose-950">Pemasangan Stiker / Papan Peringatan Penunggak Pajak</h5>
+                                    <p class="text-xs text-slate-700 mt-1 leading-relaxed">
+                                        Operasi gabungan bersama Satpol PP dan Kejaksaan untuk memasang <strong>stiker/plang peringatan "Objek Pajak Ini Belum Melunasi Kewajiban Pajak Daerah"</strong> pada lokasi usaha/properti komersial yang menunggak PBB-P2, Reklame, maupun PBJT sebagai efek jera (<em>deterrent effect</em>).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PILAR 2: EKSTENSIFIKASI PAJAK -->
+                    <div class="card-elevated rounded-2xl overflow-hidden border border-emerald-200">
+                        <div class="bg-emerald-800 text-white px-6 py-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-white/15 rounded-lg">
+                                    <i data-lucide="radar" class="w-5 h-5 text-emerald-200"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-display font-bold text-base">STRATEGI EKSTENSIFIKASI</h4>
+                                    <p class="text-xs text-emerald-100">Perluasan basis pajak, pemutakhiran data & digitalisasi kanal bayar</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 bg-white text-emerald-900 font-bold text-[11px] rounded-lg">Pertumbuhan Baru</span>
+                        </div>
+
+                        <div class="p-6 space-y-4">
+                            <!-- Action 2.1 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0 font-bold text-sm">B1</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-slate-900">Pemutakhiran Data Objek Pajak (PBB-P2 & Kawasan Reklamasi/Pesisir)</h5>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                        Pendataan ulang (<em>sisir lokasi</em>) atas perubahan fisik bangunan, pemecahan SPPT, dan alih fungsi lahan komersial di <strong>Kamal Muara, Kapuk Muara, dan Pluit</strong> untuk menyesuaikan NJOP dan mempercepat validasi <strong>BPHTB</strong> yang masih kurang Rp 430,11 Miliar.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action 2.2 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0 font-bold text-sm">B2</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-slate-900">Pendataan & Penetapan Wajib Pajak PBJT Baru</h5>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                        Menyisir potensi Wajib Pajak baru pada pusat kuliner, kafe, restoran, pengelola parkir gedung/kawasan, serta titik reklame baru di koridor PIK, Muara Karang, dan Penjaringan agar segera terdaftar memiliki NPWPD.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action 2.3 -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0 font-bold text-sm">B3</div>
+                                <div>
+                                    <h5 class="font-bold text-sm text-emerald-950">Perluasan Kanal Pembayaran Digital (QRIS & Virtual Account)</h5>
+                                    <p class="text-xs text-slate-700 mt-1 leading-relaxed">
+                                        Mempermudah pelunasan pajak dengan sosialisasi masif pembayaran non-tunai melalui <strong>QRIS Dinamis, Virtual Account (Bank DKI & Bank Himbara/Swasta), serta gerai ritel/e-commerce</strong>, khususnya untuk mendongkrak rasio kelunasan lembar SPPT di Kel. Penjaringan dan Pejagalan.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Matrix Table -->
+                <div class="card-elevated rounded-2xl p-5">
+                    <h4 class="font-display font-bold text-slate-900 text-base mb-3">Matriks Target & Output Rencana Tindak Lanjut (24 Nov – 31 Des 2026)</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-800 border-y border-slate-200">
+                                    <th class="py-2.5 px-3 font-bold">Strategi</th>
+                                    <th class="py-2.5 px-3 font-bold">Sektor / Lokasi Sasaran</th>
+                                    <th class="py-2.5 px-3 font-bold">Aksi Konkret Lapangan</th>
+                                    <th class="py-2.5 px-3 font-bold">Indikator Keberhasilan (Output)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="py-3 px-3 font-semibold text-blue-900">Intensifikasi</td>
+                                    <td class="py-3 px-3">PBB-P2 (Kamal Muara & Pluit)</td>
+                                    <td class="py-3 px-3">Surat Paksa, pemanggilan WP besar & pemasangan stiker/plang</td>
+                                    <td class="py-3 px-3 font-medium text-emerald-700">Pencairan piutang & tunggakan berjalan &ge; Rp 45 Miliar</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-3 font-semibold text-blue-900">Intensifikasi</td>
+                                    <td class="py-3 px-3">PBJT Parkir, Hotel & Reklame</td>
+                                    <td class="py-3 px-3">Uji petik omzet, sinkronisasi tapping box & penertiban reklame</td>
+                                    <td class="py-3 px-3 font-medium text-emerald-700">Menutup shortfall Reklame & Parkir (&ge; Rp 12 Miliar)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-3 font-semibold text-emerald-800">Ekstensifikasi</td>
+                                    <td class="py-3 px-3">BPHTB & Objek PBB-P2 Baru</td>
+                                    <td class="py-3 px-3">Percepatan validasi berkas PPAT & pemutakhiran data pesisir</td>
+                                    <td class="py-3 px-3 font-medium text-emerald-700">Akselerasi realisasi BPHTB &ge; Rp 250 Miliar di akhir tahun</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-3 font-semibold text-emerald-800">Ekstensifikasi</td>
+                                    <td class="py-3 px-3">WP PBJT Baru & SPPT Ritel</td>
+                                    <td class="py-3 px-3">Pendataan tenant baru PIK/Muara Karang & layanan QRIS/VA keliling</td>
+                                    <td class="py-3 px-3 font-medium text-emerald-700">Kenaikan kepatuhan SPPT Penjaringan & Pejagalan &gt; 65%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 4: SIMULASI KEJAR TARGET AKHIR TAHUN -->
+        <!-- ===================================================================== -->
+        <div id="tab-simulasi" class="hidden space-y-6">
+            <div class="card-elevated rounded-2xl p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-800">Alat Bantu Pengambilan Keputusan</span>
+                        <h3 class="font-display text-xl font-bold text-slate-900 mt-0.5">Simulator Proyeksi Realisasi Akhir Tahun (31 Desember 2026)</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                            Geser parameter di bawah ini untuk mensimulasikan dampak pelaksanaan Intensifikasi & Ekstensifikasi selama 38 hari tersisa (24 Nov – 31 Des 2026).
+                        </p>
+                    </div>
+                    <button onclick="resetSimulasi()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition self-start md:self-center cursor-pointer">
+                        Reset Skenario Moderat
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+                    <!-- Sliders Control -->
+                    <div class="lg:col-span-7 space-y-5">
+                        <!-- Slider 1: BPHTB -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <label for="sim-bphtb" class="text-xs sm:text-sm font-bold text-slate-900">1. Akselerasi Validasi BPHTB (Kurang Rp 430,11 M)</label>
+                                <span id="val-bphtb" class="text-sm font-extrabold text-blue-900">Rp 250,00 M</span>
+                            </div>
+                            <input type="range" id="sim-bphtb" min="50" max="450" step="5" value="250" oninput="updateSimulasi()" class="w-full accent-blue-900 cursor-pointer">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>Pesimis (Rp 50 M)</span>
+                                <span>Target Tutup Gap (Rp 430 M)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 2: Pencairan Piutang PBB-P2 -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <label for="sim-piutang" class="text-xs sm:text-sm font-bold text-slate-900">2. Penagihan Aktif & Stiker Piutang PBB-P2 (Potensi Rp 538,25 M)</label>
+                                <span id="val-piutang" class="text-sm font-extrabold text-emerald-700">Rp 45,00 M</span>
+                            </div>
+                            <input type="range" id="sim-piutang" min="5" max="120" step="1" value="45" oninput="updateSimulasi()" class="w-full accent-emerald-700 cursor-pointer">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>Minimal (Rp 5 M)</span>
+                                <span>Agresif Surat Paksa (Rp 120 M)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 3: Tunggakan PBB Tahun Berjalan -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <label for="sim-pbb2026" class="text-xs sm:text-sm font-bold text-slate-900">3. Pelunasan PBB-P2 Tahun Berjalan via QRIS/VA (Sisa Rp 212,61 M)</label>
+                                <span id="val-pbb2026" class="text-sm font-extrabold text-amber-700">Rp 35,00 M</span>
+                            </div>
+                            <input type="range" id="sim-pbb2026" min="5" max="100" step="1" value="35" oninput="updateSimulasi()" class="w-full accent-amber-600 cursor-pointer">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>Minimal (Rp 5 M)</span>
+                                <span>Optimal (Rp 100 M)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 4: Intensifikasi & Ekstensifikasi PBJT & Reklame -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <label for="sim-pbjt" class="text-xs sm:text-sm font-bold text-slate-900">4. Pemeriksaan PBJT (Mamin/Hotel/Parkir) & Penertiban Reklame</label>
+                                <span id="val-pbjt" class="text-sm font-extrabold text-indigo-700">Rp 55,00 M</span>
+                            </div>
+                            <input type="range" id="sim-pbjt" min="20" max="100" step="1" value="55" oninput="updateSimulasi()" class="w-full accent-indigo-700 cursor-pointer">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>Run-rate Normal (Rp 20 M)</span>
+                                <span>Uji Petik & WP Baru (Rp 100 M)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Result Card -->
+                    <div class="lg:col-span-5 flex flex-col justify-between bg-slate-900 text-white rounded-2xl p-6 border border-slate-800">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Hasil Proyeksi 31 Des 2026</span>
+                                <span id="sim-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                                    Skenario Moderat
+                                </span>
+                            </div>
+
+                            <div>
+                                <div class="text-xs text-slate-400">Realisasi Eksisting (23 Nov 2026)</div>
+                                <div class="font-mono text-lg font-bold text-slate-200">Rp 1.737,57 Miliar</div>
+                            </div>
+
+                            <div>
+                                <div class="text-xs text-slate-400">Tambahan Penerimaan (24 Nov – 31 Des)</div>
+                                <div id="sim-tambahan" class="font-mono text-xl font-bold text-emerald-400">+ Rp 385,00 Miliar</div>
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-700">
+                                <div class="text-xs text-slate-300">Total Proyeksi Realisasi Akhir Tahun</div>
+                                <div id="sim-total" class="font-display text-3xl font-extrabold text-white mt-1">Rp 2.122,57 Miliar</div>
+                                <div class="text-xs text-slate-400 mt-1">Target APBD-P 2026: Rp 2.210,12 Miliar</div>
+                            </div>
+
+                            <!-- Progress Bar Proyeksi -->
+                            <div class="pt-2">
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span>Proyeksi Capaian Target</span>
+                                    <span id="sim-persen" class="text-amber-300 text-sm">96,04%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                    <div id="sim-bar" class="bg-gradient-to-r from-blue-500 to-emerald-400 h-3 rounded-full transition-all duration-300" style="width: 96.04%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="sim-note" class="mt-6 p-3.5 rounded-xl bg-white/10 text-xs text-slate-200 leading-relaxed">
+                            Dengan skenario ini, capaian UP3D Penjaringan diproyeksikan menembus <strong>96,04%</strong> (sisa gap Rp 87,56 Miliar). Diperlukan percepatan validasi BPHTB agar mencapai 100%.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-6 border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div>
+            <strong>UP3D Kecamatan Penjaringan</strong> — Badan Pendapatan Daerah Provinsi DKI Jakarta
+        </div>
+        <div>
+            Sumber Data: Laporan Realisasi PBB-P2 dan 9 Jenis Pajak Daerah Posisi Senin, 23 November 2026
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT DATA & CHARTS -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Exact Data from Python Processing
+        const dataPajak = [
+            {
+                nama: "PBB-P2",
+                target: 965060482956,
+                realisasi: 934464247919,
+                capaian: 96.83,
+                kontribusi: 53.78,
+                selisih: -30596235037,
+                yoy: 10.29,
+                status: "kurang"
+            },
+            {
+                nama: "BPHTB",
+                target: 781403091834,
+                realisasi: 351297837735,
+                capaian: 44.96,
+                kontribusi: 20.22,
+                selisih: -430105254099,
+                yoy: -24.03,
+                status: "kurang"
+            },
+            {
+                nama: "PBJT Makanan & Minuman",
+                target: 279416044182,
+                realisasi: 282355178867,
+                capaian: 101.05,
+                kontribusi: 16.25,
+                selisih: 2939134685,
+                yoy: 8.69,
+                status: "surplus"
+            },
+            {
+                nama: "PBJT Jasa Perhotelan",
+                target: 74125308193,
+                realisasi: 71795635446,
+                capaian: 96.86,
+                kontribusi: 4.13,
+                selisih: -2329672747,
+                yoy: 17.85,
+                status: "kurang"
+            },
+            {
+                nama: "Pajak Reklame",
+                target: 52467194261,
+                realisasi: 42797226345,
+                capaian: 81.57,
+                kontribusi: 2.46,
+                selisih: -9669967916,
+                yoy: 134.56,
+                status: "kurang"
+            },
+            {
+                nama: "PBJT Jasa Kesenian & Hiburan",
+                target: 31539876647,
+                realisasi: 32104582594,
+                capaian: 101.79,
+                kontribusi: 1.85,
+                selisih: 564705947,
+                yoy: 5.38,
+                status: "surplus"
+            },
+            {
+                nama: "PBJT Jasa Parkir",
+                target: 23209123588,
+                realisasi: 20433306860,
+                capaian: 88.04,
+                kontribusi: 1.18,
+                selisih: -2775816728,
+                yoy: -55.68,
+                status: "kurang"
+            },
+            {
+                nama: "PAT (Pajak Air Tanah)",
+                target: 1949229526,
+                realisasi: 1955732073,
+                capaian: 100.33,
+                kontribusi: 0.11,
+                selisih: 6502547,
+                yoy: -30.30,
+                status: "surplus"
+            },
+            {
+                nama: "PBBKB",
+                target: 953895219,
+                realisasi: 363788049,
+                capaian: 38.14,
+                kontribusi: 0.02,
+                selisih: -590107170,
+                yoy: -67.91,
+                status: "kurang"
+            }
+        ];
+
+        const dataKelurahan = [
+            {
+                kode: "001-Kamal Muara",
+                targetM: 408.21,
+                realisasiM: 430.87,
+                capaian: 105.55,
+                belumBayarM: 89.01,
+                piutangM: 297.14,
+                sppt: 14847,
+                kepatuhanSppt: "Tinggi (Komersial)"
+            },
+            {
+                kode: "002-Kapuk Muara",
+                targetM: 191.60,
+                realisasiM: 178.98,
+                capaian: 93.41,
+                belumBayarM: 33.66,
+                piutangM: 62.24,
+                sppt: 15402,
+                kepatuhanSppt: "Baik"
+            },
+            {
+                kode: "005-Penjaringan",
+                targetM: 98.72,
+                realisasiM: 90.95,
+                capaian: 92.13,
+                belumBayarM: 20.37,
+                piutangM: 69.59,
+                sppt: 57918,
+                kepatuhanSppt: "43,56% (Rendah)"
+            },
+            {
+                kode: "004-Pluit",
+                targetM: 197.10,
+                realisasiM: 175.02,
+                capaian: 88.80,
+                belumBayarM: 49.38,
+                piutangM: 63.00,
+                sppt: 43585,
+                kepatuhanSppt: "Sedang"
+            },
+            {
+                kode: "003-Pejagalan",
+                targetM: 69.43,
+                realisasiM: 58.79,
+                capaian: 84.67,
+                belumBayarM: 20.19,
+                piutangM: 46.28,
+                sppt: 42137,
+                kepatuhanSppt: "57,35% (Rendah)"
+            }
+        ];
+
+        // Format Rupiah helper
+        function formatRupiah(num) {
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        // Render Table 1: Struktur Pajak
+        function renderTablePajak() {
+            const filter = document.getElementById('filterStatusPajak').value;
+            const tbody = document.getElementById('tbody-pajak');
+            tbody.innerHTML = '';
+
+            const filtered = dataPajak.filter(item => {
+                if (filter === 'all') return true;
+                return item.status === filter;
+            });
+
+            filtered.forEach((item, idx) => {
+                const isSurplus = item.selisih >= 0;
+                const badgeCapaian = item.capaian >= 100
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : (item.capaian >= 80 ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800');
+
+                const selisihFormatted = isSurplus
+                    ? `+${formatRupiah(item.selisih)}`
+                    : formatRupiah(item.selisih);
+
+                const yoyFormatted = item.yoy >= 0
+                    ? `+${item.yoy.toFixed(2).replace('.', ',')}%`
+                    : `${item.yoy.toFixed(2).replace('.', ',')}%`;
+
+                const row = `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-medium text-slate-500">${idx + 1}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900">${item.nama}</td>
+                        <td class="py-3 px-4 text-right font-mono text-slate-700">${formatRupiah(item.target)}</td>
+                        <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900">${formatRupiah(item.realisasi)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeCapaian}">
+                                ${item.capaian.toFixed(2).replace('.', ',')}%
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-center font-semibold text-slate-700">
+                            ${item.kontribusi.toFixed(2).replace('.', ',')}%
+                        </td>
+                        <td class="py-3 px-4 text-right font-mono font-semibold ${isSurplus ? 'text-emerald-700' : 'text-rose-700'}">
+                            ${selisihFormatted}
+                        </td>
+                        <td class="py-3 px-4 text-center font-semibold ${item.yoy >= 0 ? 'text-emerald-700' : 'text-rose-600'}">
+                            ${yoyFormatted}
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // Render Table 2: Kelurahan PBB-P2
+        function renderTableKelurahan() {
+            const tbody = document.getElementById('tbody-kelurahan');
+            tbody.innerHTML = '';
+
+            dataKelurahan.forEach(kel => {
+                const isOver = kel.capaian >= 100;
+                const isLowSppt = kel.kepatuhanSppt.includes('Rendah');
+                const row = `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-4 font-bold text-slate-900">${kel.kode}</td>
+                        <td class="py-3.5 px-4 text-right font-mono text-slate-700">Rp ${kel.targetM.toFixed(2).replace('.', ',')} M</td>
+                        <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">Rp ${kel.realisasiM.toFixed(2).replace('.', ',')} M</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isOver ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">
+                                ${kel.capaian.toFixed(2).replace('.', ',')}%
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-mono text-amber-800 font-semibold">Rp ${kel.belumBayarM.toFixed(2).replace('.', ',')} M</td>
+                        <td class="py-3.5 px-4 text-right font-mono text-rose-700 font-bold">Rp ${kel.piutangM.toFixed(2).replace('.', ',')} M</td>
+                        <td class="py-3.5 px-4 text-right font-mono text-slate-700">${formatRupiah(kel.sppt)}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold ${isLowSppt ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'}">
+                                ${kel.kepatuhanSppt}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['ringkasan', 'tabel', 'kendala', 'simulasi'];
+            tabs.forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === tabName) {
+                    section.classList.remove('hidden');
+                    btn.classList.remove('tab-inactive');
+                    btn.classList.add('tab-active');
+                } else {
+                    section.classList.add('hidden');
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive');
+                }
+            });
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#475569';
+
+            // 1. Chart Struktur Kontribusi (Doughnut)
+            const ctxKontribusi = document.getElementById('chartKontribusi').getContext('2d');
+            new Chart(ctxKontribusi, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'PBB-P2 (53,78%)',
+                        'BPHTB (20,22%)',
+                        'PBJT Mamin (16,25%)',
+                        'PBJT Perhotelan (4,13%)',
+                        'Pajak Reklame (2,46%)',
+                        'PBJT Hiburan (1,85%)',
+                        'PBJT Parkir, PAT & PBBKB (1,31%)'
+                    ],
+                    datasets: [{
+                        data: [53.78, 20.22, 16.25, 4.13, 2.46, 1.85, 1.31],
+                        backgroundColor: [
+                            '#1e3a8a', // PBB-P2
+                            '#d97706', // BPHTB
+                            '#059669', // Mamin
+                            '#2563eb', // Perhotelan
+                            '#7c3aed', // Reklame
+                            '#0d9488', // Hiburan
+                            '#94a3b8'  // Lainnya
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 12,
+                                font: { size: 11, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Kontribusi: ${context.parsed}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Chart Target vs Realisasi (Grouped Bar dalam Miliar Rp)
+            const ctxTargetReal = document.getElementById('chartTargetRealisasi').getContext('2d');
+            new Chart(ctxTargetReal, {
+                type: 'bar',
+                data: {
+                    labels: ['PBB-P2', 'BPHTB', 'PBJT Mamin', 'PBJT Hotel', 'Reklame', 'PBJT Hiburan', 'PBJT Parkir', 'PAT & PBBKB'],
+                    datasets: [
+                        {
+                            label: 'Target APBD-P (Miliar Rp)',
+                            data: [965.06, 781.40, 279.42, 74.13, 52.47, 31.54, 23.21, 2.90],
+                            backgroundColor: '#cbd5e1',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Realisasi 23 Nov (Miliar Rp)',
+                            data: [934.46, 351.30, 282.36, 71.80, 42.80, 32.10, 20.43, 2.32],
+                            backgroundColor: '#1e3a8a',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 12, font: { size: 11, weight: '600' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return ` ${ctx.dataset.label}: Rp ${ctx.parsed.y.toFixed(2)} M`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: val => `Rp ${val} M`,
+                                font: { size: 11 }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '600' } }
+                        }
+                    }
+                }
+            });
+
+            // 3. Chart Capaian Persen (Horizontal Bar)
+            const ctxCapaian = document.getElementById('chartCapaianPersen').getContext('2d');
+            const capaianVals = [101.79, 101.05, 100.33, 96.86, 96.83, 88.04, 81.57, 44.96, 38.14];
+            const barColors = capaianVals.map(v => v >= 100 ? '#059669' : (v >= 80 ? '#2563eb' : '#e11d48'));
+
+            new Chart(ctxCapaian, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'PBJT Hiburan',
+                        'PBJT Mamin',
+                        'Pajak Air Tanah',
+                        'PBJT Perhotelan',
+                        'PBB-P2',
+                        'PBJT Jasa Parkir',
+                        'Pajak Reklame',
+                        'BPHTB',
+                        'PBBKB'
+                    ],
+                    datasets: [{
+                        label: 'Capaian Target (%)',
+                        data: capaianVals,
+                        backgroundColor: barColors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` Capaian: ${ctx.parsed.x.toFixed(2)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            max: 115,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { callback: v => `${v}%`, font: { size: 11 } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '600' } }
+                        }
+                    }
+                }
+            });
+
+            // 4. Chart PBB-P2 & Piutang per Kelurahan
+            const ctxKel = document.getElementById('chartKelurahan').getContext('2d');
+            new Chart(ctxKel, {
+                type: 'bar',
+                data: {
+                    labels: ['Kamal Muara', 'Kapuk Muara', 'Pluit', 'Penjaringan', 'Pejagalan'],
+                    datasets: [
+                        {
+                            label: 'Target PBB-P2 (Miliar)',
+                            data: [408.21, 191.60, 197.10, 98.72, 69.43],
+                            backgroundColor: '#94a3b8',
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Realisasi PBB-P2 (Miliar)',
+                            data: [430.87, 178.98, 175.02, 90.95, 58.79],
+                            backgroundColor: '#059669',
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Sisa Piutang Pokok 93-25 (Miliar)',
+                            data: [297.14, 62.24, 63.00, 69.59, 46.28],
+                            backgroundColor: '#e11d48',
+                            borderRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 11, font: { size: 11, weight: '600' } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: Rp ${ctx.parsed.y.toFixed(2)} M`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { callback: v => `Rp ${v} M`, font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Simulator Logic
+        function updateSimulasi() {
+            const baseRealisasi = 1737.567535888; // dalam Miliar
+            const targetTotal = 2210.124246406;   // dalam Miliar
+
+            const addBphtb = parseFloat(document.getElementById('sim-bphtb').value);
+            const addPiutang = parseFloat(document.getElementById('sim-piutang').value);
+            const addPbb2026 = parseFloat(document.getElementById('sim-pbb2026').value);
+            const addPbjt = parseFloat(document.getElementById('sim-pbjt').value);
+
+            document.getElementById('val-bphtb').textContent = `Rp ${addBphtb.toFixed(2).replace('.', ',')} M`;
+            document.getElementById('val-piutang').textContent = `Rp ${addPiutang.toFixed(2).replace('.', ',')} M`;
+            document.getElementById('val-pbb2026').textContent = `Rp ${addPbb2026.toFixed(2).replace('.', ',')} M`;
+            document.getElementById('val-pbjt').textContent = `Rp ${addPbjt.toFixed(2).replace('.', ',')} M`;
+
+            const totalTambahan = addBphtb + addPiutang + addPbb2026 + addPbjt;
+            const proyeksiTotal = baseRealisasi + totalTambahan;
+            const proyeksiPersen = (proyeksiTotal / targetTotal) * 100;
+            const sisaGap = targetTotal - proyeksiTotal;
+
+            document.getElementById('sim-tambahan').textContent = `+ Rp ${totalTambahan.toFixed(2).replace('.', ',')} Miliar`;
+            document.getElementById('sim-total').textContent = `Rp ${proyeksiTotal.toFixed(2).replace('.', ',')} Miliar`;
+            document.getElementById('sim-persen').textContent = `${proyeksiPersen.toFixed(2).replace('.', ',')}%`;
+            document.getElementById('sim-bar').style.width = `${Math.min(proyeksiPersen, 100)}%`;
+
+            const badge = document.getElementById('sim-badge');
+            const note = document.getElementById('sim-note');
+
+            if (proyeksiPersen >= 100) {
+                badge.textContent = "Target Tercapai / Surplus";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+                note.innerHTML = `Luar biasa! Proyeksi realisasi melampaui target APBD-P 2026 sebesar <strong>+Rp ${Math.abs(sisaGap).toFixed(2).replace('.', ',')} Miliar</strong> (${proyeksiPersen.toFixed(2).replace('.', ',')}%).`;
+            } else if (proyeksiPersen >= 95) {
+                badge.textContent = "Skenario Optimis";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30";
+                note.innerHTML = `Capaian diproyeksikan sangat kuat di angka <strong>${proyeksiPersen.toFixed(2).replace('.', ',')}%</strong> (sisa gap Rp ${sisaGap.toFixed(2).replace('.', ',')} Miliar).`;
+            } else {
+                badge.textContent = "Perlu Akselerasi Ekstra";
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30";
+                note.innerHTML = `Capaian diproyeksikan <strong>${proyeksiPersen.toFixed(2).replace('.', ',')}%</strong> (masih kurang Rp ${sisaGap.toFixed(2).replace('.', ',')} Miliar). Tingkatkan penagihan aktif PBB-P2 dan validasi BPHTB.`;
+            }
+        }
+
+        function resetSimulasi() {
+            document.getElementById('sim-bphtb').value = 250;
+            document.getElementById('sim-piutang').value = 45;
+            document.getElementById('sim-pbb2026').value = 35;
+            document.getElementById('sim-pbjt').value = 55;
+            updateSimulasi();
+        }
+
+        // Copy Executive Summary to Clipboard (using execCommand fallback for iframe safety)
+        function copyExecutiveSummary() {
+            const summaryText = `LAPORAN ANALISIS PENERIMAAN PAJAK UP3D KECAMATAN PENJARINGAN (POSISI 23 NOV 2026)
+1. Target APBD-P 2026: Rp 2.210.124.246.406 (Rp 2,21 Triliun)
+2. Realisasi s.d. 23 Nov 2026: Rp 1.737.567.535.888 (78,62% | Tumbuh +0,49% YoY)
+3. Kekurangan Target: Rp 472.556.710.518 (91,02% berasal dari BPHTB sebesar Rp 430,11 M)
+4. Sisa Piutang Pokok PBB-P2 (1993-2025): Rp 538.252.650.937 dari 173.889 SPPT
+5. Strategi Optimalisasi:
+   - Intensifikasi: Penagihan aktif & surat paksa, pemeriksaan pajak/uji petik omzet (tapping box), pemasangan stiker/papan peringatan penunggak pajak.
+   - Ekstensifikasi: Pemutakhiran data objek pajak (PBB-P2 & WP PBJT baru) serta perluasan kanal pembayaran digital (QRIS/Virtual Account).`;
+
+            const textArea = document.createElement("textarea");
+            textArea.value = summaryText;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Ringkasan eksekutif berhasil disalin ke clipboard!");
+            } catch (err) {
+                showToast("Gagal menyalin teks secara otomatis.");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // Run on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTablePajak();
+            renderTableKelurahan();
+            initCharts();
+            updateSimulasi();
+        });
+    </script>
+</body>
+</html>
